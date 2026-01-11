@@ -1,0 +1,48 @@
+<?php
+
+namespace Modelesque\ApiTokenManager\Services\Providers;
+
+use Modelesque\ApiTokenManager\Abstracts\AuthTokenProvider;
+use Modelesque\ApiTokenManager\Contracts\OAuth2TokenProviderInterface;
+use Modelesque\ApiTokenManager\Enums\ApiTokenGrantType;
+use Modelesque\ApiTokenManager\Models\ApiToken;
+
+class ClientCredentialsAuthTokenProvider extends AuthTokenProvider implements OAuth2TokenProviderInterface
+{
+    /** @inheritdoc */
+    public function requestToken(?ApiToken $token): array
+    {
+        $authorization = implode(':', [$this->clientId(), $this->clientSecret()]);
+        $headers = ['Authorization' => 'Basic ' . base64_encode($authorization)];
+
+        $response = $this->postRequestForToken(
+            ['grant_type' => ApiTokenGrantType::CLIENT_CREDENTIALS->value],
+            $headers
+        );
+
+        return $this->normalizeResponse($response);
+    }
+
+    /**
+     * After requesting a token from the API, normalize its response so the
+     * data can be saved as an ApiToken.
+     *
+     * @param array $response
+     * @return array
+     */
+    protected function normalizeResponse(array $response): array
+    {
+        $token = $response['access_token'] ?? $response['token'] ?? null;
+        $tokenType = strtolower($response['token_type'] ?? 'bearer');
+        $expiresAt = $this->normalizeValueForExpiresIn(
+            $response['expires_in'] ?? $response['expires_at'] ?? $response['expires'] ?? null
+        );
+
+        return array_filter([
+            'token_type' => $tokenType,
+            'token' => $token ?? false,
+            'expires_at' => $expiresAt ?: false,
+            'meta' => $response,
+        ]);
+    }
+}
