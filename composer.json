@@ -1,0 +1,48 @@
+{
+  "name": "modelesque/laravel-api-token-manager",
+  "description": "Manages access tokens for APIs.",
+  "version": "1.0.0",
+  "keywords": ["php", "laravel", "package", "library"],
+  "license": "MIT",
+  "type": "library",
+  "require": {
+    "php": "^8.1",
+    "illuminate/support": "^9.0|^10.0|^11.0",
+    "illuminate/console": "^9.0|^10.0|^11.0"
+  },
+  "require-dev": {
+    "laravel/framework": "^v12.0",
+    "mockery/mockery": "^1.6",
+    "orchestra/testbench": "^6.0|^7.0",
+    "pestphp/pest": "^2.0",
+    "pestphp/pest-plugin-laravel": "^2.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Modelesque\\ApiTokenManager\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Modelesque\\ApiTokenManager\\Tests\\": "tests/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Modelesque\\ApiTokenManager\\ApiTokenManagerServiceProvider"
+      ]
+    }
+  },
+  "scripts": {
+    "test": "pest"
+  },
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}
