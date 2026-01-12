@@ -15,15 +15,21 @@ class ApiTokenManagerServiceProvider extends ServiceProvider
         $this->app->singleton(TokenManager::class);
         $this->app->bind(PKCEAuthCodeFlowInterface::class, PKCEAuthTokenProvider::class);
         $this->app->bind(ApiTokenRepositoryInterface::class, EloquentApiTokenRepository::class);
+
+        // provide a fallback config that can be overwritten by hosts using this package
+        $this->mergeConfigFrom(__DIR__ . '/../config/apis.php', 'apis');
     }
 
     public function boot(): void
     {
+        // Load migrations automatically
+        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+
         // let hosts run this migration via:
         // php artisan vendor:publish --tag=migrations
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__.'/../database/migrations/' => database_path('migrations'),
+                __DIR__ . '/../database/migrations/' => database_path('migrations'),
             ], 'migrations');
         }
     }

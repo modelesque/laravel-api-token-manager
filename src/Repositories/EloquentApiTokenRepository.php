@@ -5,18 +5,10 @@ namespace Modelesque\ApiTokenManager\Repositories;
 use Modelesque\ApiTokenManager\Abstracts\BaseRepository;
 use Modelesque\ApiTokenManager\Contracts\ApiTokenRepositoryInterface;
 use Modelesque\ApiTokenManager\Models\ApiToken;
-use JetBrains\PhpStorm\Pure;
 
-/**
- * @see https://asperbrothers.com/blog/implement-repository-pattern-in-laravel/
- */
-class EloquentApiTokenRepository extends BaseRepository implements ApiTokenRepositoryInterface
+class EloquentApiTokenRepository implements ApiTokenRepositoryInterface
 {
-    #[Pure]
-    public function __construct(ApiToken $model)
-    {
-        parent::__construct($model);
-    }
+    public function __construct(protected ApiToken $model) {}
 
     /** @inheritDoc */
     public function getSavedToken(string $provider, string $account): ?ApiToken
