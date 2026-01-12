@@ -11,18 +11,19 @@ class EloquentApiTokenRepository implements ApiTokenRepositoryInterface
     public function __construct(protected ApiToken $model) {}
 
     /** @inheritDoc */
-    public function getSavedToken(string $provider, string $account): ?ApiToken
+    public function getSavedToken(string $provider, string $account, string $grantType): ?ApiToken
     {
         return $this->model::query()
             ->where([
                 ['provider', $provider],
-                ['account', $account]
+                ['account', $account],
+                ['grant_type', $grantType],
             ])
             ->first();
     }
 
     /** @inheritDoc */
-    public function saveToken(string $provider, string $account, array $payload): ApiToken
+    public function saveToken(string $provider, string $account, string $grantType, array $payload): ApiToken
     {
         $payload['provider'] = $provider;
 
@@ -30,18 +31,20 @@ class EloquentApiTokenRepository implements ApiTokenRepositoryInterface
             [
                 'provider' => $provider,
                 'account' => $account,
+                'grant_type' => $grantType,
             ],
             $payload
         );
     }
 
     /** @inheritDoc */
-    public function deleteSavedToken(string $provider, string $account): void
+    public function deleteSavedToken(string $provider, string $account, string $grantType): void
     {
         $this->model::query()
             ->where([
                 ['provider', $provider],
-                ['account', $account]
+                ['account', $account],
+                ['grant_type', $grantType],
             ])->delete();
     }
 }

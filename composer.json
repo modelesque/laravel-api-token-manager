@@ -1,6 +1,6 @@
 {
   "name": "modelesque/laravel-api-token-manager",
-  "description": "Manages access tokens for APIs.",
+  "description": "Manage access tokens for API packages.",
   "version": "1.0.0",
   "keywords": ["php", "laravel", "package", "library"],
   "license": "MIT",
@@ -40,5 +40,11 @@
     }
   },
   "minimum-stability": "dev",
-  "prefer-stable": true
+  "prefer-stable": true,
+  "authors": [
+    {
+      "name": "Ryan White",
+      "email": "modelesquebiz@gmail.com"
+    }
+  ]
 }

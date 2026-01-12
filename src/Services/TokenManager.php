@@ -36,7 +36,11 @@ class TokenManager
     public function getToken(string $configKey, string $account, string $grantType): ?string
     {
         // if saved token exists and won't expire within the next 30 seconds
-        $savedToken = $this->repository->getSavedToken($configKey, $account);
+        $savedToken = $this->repository->getSavedToken(
+            $configKey,
+            $account,
+            $grantType
+        );
         if (
             $savedToken &&
             $savedToken->expires_at &&
@@ -57,8 +61,8 @@ class TokenManager
         // no saved token, so get a new one
         /** @var OAuth2TokenProviderInterface $provider */
         $provider = match ($grantType) {
-            ApiTokenGrantType::PKCE->value => new PKCEAuthTokenProvider($account, $configKey),
-            ApiTokenGrantType::CLIENT_CREDENTIALS->value => new ClientCredentialsAuthTokenProvider($account, $configKey),
+            ApiTokenGrantType::PKCE->value => new PKCEAuthTokenProvider($configKey, $account),
+            ApiTokenGrantType::CLIENT_CREDENTIALS->value => new ClientCredentialsAuthTokenProvider($configKey,$account),
             default => throw new RuntimeException("Unsupported token grant type: $grantType"),
         };
 
@@ -66,7 +70,12 @@ class TokenManager
         $payload['grant_type'] = $grantType;
 
         // save the returned token to the db
-        $saved = $this->repository->saveToken($configKey, $account, $payload);
+        $saved = $this->repository->saveToken(
+            $configKey,
+            $account,
+            $grantType,
+            $payload
+        );
 
         return $saved->token;
     }

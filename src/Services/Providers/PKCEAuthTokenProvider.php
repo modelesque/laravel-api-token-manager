@@ -323,6 +323,7 @@ class PKCEAuthTokenProvider extends AuthTokenProvider implements OAuth2TokenProv
                 ->saveToken(
                     $this->configKey,
                     $this->account,
+                    ApiTokenGrantType::PKCE->value,
                     $payload
                 );
             $message = sprintf("%s access token saved.", $this->name());
