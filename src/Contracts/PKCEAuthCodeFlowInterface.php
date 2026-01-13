@@ -3,7 +3,11 @@
 namespace Modelesque\ApiTokenManager\Contracts;
 
 use Illuminate\Http\RedirectResponse;
+use Modelesque\ApiTokenManager\Services\Providers\PKCEAuthTokenProvider;
 
+/**
+ * @see PKCEAuthTokenProvider
+ */
 interface PKCEAuthCodeFlowInterface
 {
     /**

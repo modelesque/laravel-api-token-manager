@@ -5,7 +5,13 @@ namespace Modelesque\ApiTokenManager\Contracts;
 use Modelesque\ApiTokenManager\Exceptions\PKCEAuthorizationRequiredException;
 use Modelesque\ApiTokenManager\Models\ApiToken;
 use Illuminate\Http\Client\ConnectionException;
+use Modelesque\ApiTokenManager\Services\Providers\ClientCredentialsAuthTokenProvider;
+use Modelesque\ApiTokenManager\Services\Providers\PKCEAuthTokenProvider;
 
+/**
+ * @see ClientCredentialsAuthTokenProvider
+ * @see PKCEAuthTokenProvider
+ */
 interface OAuth2TokenProviderInterface
 {
     /**
