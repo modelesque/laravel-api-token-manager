@@ -3,12 +3,13 @@
 namespace Modelesque\ApiTokenManager\Factories;
 
 use Modelesque\ApiTokenManager\Enums\ApiTokenGrantType;
+use Modelesque\ApiTokenManager\Exceptions\InvalidConfigException;
 use Modelesque\ApiTokenManager\Exceptions\PKCEAuthorizationRequiredException;
+use Modelesque\ApiTokenManager\Helpers\Config;
 use Modelesque\ApiTokenManager\Services\TokenManager;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
-use InvalidArgumentException;
 
 class ApiClientFactory
 {
@@ -25,20 +26,13 @@ class ApiClientFactory
      * @return PendingRequest
      * @throws ConnectionException
      * @throws PKCEAuthorizationRequiredException
+     * @throws InvalidConfigException
      */
     public function make(string $provider, string $account, string $grantType): PendingRequest
     {
-        $config = config("apis.providers.$provider");
-        if (! isset($config[$account])) {
-            throw new InvalidArgumentException(sprintf(
-                "Keys of '%s' and/or '%s' not found in 'providers' array in %s",
-                $provider,
-                $account,
-                config_path('apis.php')
-            ));
-        }
+        $config = Config::getRequired($provider, 'base_url', $account);
 
-        $client = Http::baseUrl($config['base_url'] ?? '')->acceptJson();
+        $client = Http::baseUrl($config)->acceptJson();
 
         if (ApiTokenGrantType::isOAuth2($grantType)) {
             $token = $this->tokenManager->getToken(

@@ -23,6 +23,7 @@ interface PKCEAuthCodeFlowInterface
      * grant permission for this client to make requests on your behalf.
      *
      * @return RedirectResponse
+     * @throws InvalidConfigException
      */
     public function authorize(): RedirectResponse;
 
@@ -32,6 +33,7 @@ interface PKCEAuthCodeFlowInterface
      * authorization, this method will handle posting for a new token.
      *
      * @return RedirectResponse
+     * @throws InvalidConfigException
      */
     public function handlePostAuthorization(): RedirectResponse;
 }

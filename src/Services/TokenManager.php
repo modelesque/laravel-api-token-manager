@@ -5,23 +5,19 @@ namespace Modelesque\ApiTokenManager\Services;
 use Modelesque\ApiTokenManager\Contracts\ApiTokenRepositoryInterface;
 use Modelesque\ApiTokenManager\Contracts\OAuth2TokenProviderInterface;
 use Modelesque\ApiTokenManager\Enums\ApiTokenGrantType;
+use Modelesque\ApiTokenManager\Exceptions\InvalidConfigException;
 use Modelesque\ApiTokenManager\Exceptions\PKCEAuthorizationRequiredException;
+use Modelesque\ApiTokenManager\Helpers\Config;
 use Modelesque\ApiTokenManager\Services\Providers\ClientCredentialsAuthTokenProvider;
 use Modelesque\ApiTokenManager\Services\Providers\PKCEAuthTokenProvider;
 use Illuminate\Http\Client\ConnectionException;
-use InvalidArgumentException;
 use RuntimeException;
 
 class TokenManager
 {
-    protected ApiTokenRepositoryInterface $repository;
-    protected array $config;
-
-    public function __construct(ApiTokenRepositoryInterface $repository)
-    {
-        $this->repository = $repository;
-        $this->config = config('apis.providers', []);
-    }
+    public function __construct(
+        protected ApiTokenRepositoryInterface $repository
+    ) {}
 
     /**
      * Returns a valid access token for $provider. Refreshes if expired or missing.
@@ -32,6 +28,7 @@ class TokenManager
      * @return string|null
      * @throws ConnectionException
      * @throws PKCEAuthorizationRequiredException
+     * @throws InvalidConfigException
      */
     public function getToken(string $configKey, string $account, string $grantType): ?string
     {
@@ -49,14 +46,8 @@ class TokenManager
             return $savedToken->token;
         }
 
-        if (! isset($this->config[$configKey][$account])) {
-            throw new InvalidArgumentException(sprintf(
-                "Keys of '%s' and/or '%s' not found in 'providers' array in %s",
-                $configKey,
-                $account,
-                config_path('apis.php')
-            ));
-        }
+        // ensure we have a config array
+        Config::getProvider($configKey);
 
         // no saved token, so get a new one
         /** @var OAuth2TokenProviderInterface $provider */

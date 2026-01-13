@@ -7,53 +7,67 @@ use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
+use Modelesque\ApiTokenManager\Exceptions\InvalidConfigException;
+use Modelesque\ApiTokenManager\Helpers\Config;
 use RuntimeException;
 use Throwable;
 
 abstract class AuthTokenProvider
 {
-    protected array $config;
-
     public function __construct(
         public string $configKey,
         public string $account = '',
         protected int $retryAttempts = 2,
         protected int $retrySleepMs = 150
     ) {
-        $this->config = config("apis.providers." . $this->configKey, []);
         if (! $this->account) {
             $this->account = ApiAccount::PUBLIC->value;
         }
     }
 
-    /** @return string A read-friendly name of the API provider (e.g. "Spotify"). */
+    /**
+     * @return string A read-friendly name of the API provider (e.g. "Spotify").
+     * @throws InvalidConfigException
+     */
     protected function name(): string
     {
-        return $this->configFind('name') ?? $this->throwConfigException('name');
+        return Config::getRequired($this->configKey, 'name', $this->account);
     }
 
-    /** @return string The API's URL to request an auth token. */
+    /**
+     * @return string The API's URL to request an auth token.
+     * @throws InvalidConfigException
+     */
     protected function tokenUrl(): string
     {
-        return $this->configFind('token_url') ?? $this->throwConfigException('token_url');
+        return Config::getRequired($this->configKey, 'token_url', $this->account);
     }
 
-    /** @return string The "client_id" the API gives you for authentication. */
+    /**
+     * @return string The "client_id" the API gives you for authentication.
+     * @throws InvalidConfigException
+     */
     protected function clientId(): string
     {
-        return $this->configFind('client_id') ?? '';
+        return Config::get($this->configKey, 'client_id', $this->account);
     }
 
-    /** @return string The "client_secret" the API gives you for authentication. */
+    /**
+     * @return string The "client_secret" the API gives you for authentication.
+     * @throws InvalidConfigException
+     */
     protected function clientSecret(): string
     {
-        return $this->configFind('client_secret') ?? '';
+        return Config::get($this->configKey, 'client_secret', $this->account);
     }
 
-    /** @return string The user ID for your account (not all APIs require this). */
+    /**
+     * @return string The user ID for your account (not all APIs require this).
+     * @throws InvalidConfigException
+     */
     protected function userId(): string
     {
-        return $this->configFind('user_id') ?? '';
+        return Config::get($this->configKey, 'user_id', $this->account);
     }
 
     /** @inheritdoc */
@@ -64,29 +78,6 @@ abstract class AuthTokenProvider
             $this->configKey,
             $this->account,
         ]);
-    }
-
-    /**
-     * Return a value from the config.
-     *
-     * @param string $key
-     * @return mixed
-     */
-    protected function configFind(string $key): mixed
-    {
-        return $this->config[$key] ?? $this->config[$this->account][$key] ?? null;
-    }
-
-    /** Helper to handle when required keys aren't present in the config. */
-    protected function throwConfigException(string $key): void
-    {
-        $api = $this->configFind('name');
-        throw new RuntimeException(sprintf(
-            "Missing required%s config setting '%s' in %s",
-            $api ? " $api" : '',
-            $key,
-            config_path('apis.php')
-        ));
     }
 
     /**

@@ -2,13 +2,16 @@
 
 namespace Modelesque\ApiTokenManager\Services\Providers;
 
+use Exception;
 use Modelesque\ApiTokenManager\Abstracts\AuthTokenProvider;
 use Modelesque\ApiTokenManager\Contracts\ApiTokenRepositoryInterface;
 use Modelesque\ApiTokenManager\Contracts\OAuth2TokenProviderInterface;
 use Modelesque\ApiTokenManager\Contracts\PKCEAuthCodeFlowInterface;
 use Modelesque\ApiTokenManager\Contracts\PKCETokenProviderInterface;
 use Modelesque\ApiTokenManager\Enums\ApiTokenGrantType;
+use Modelesque\ApiTokenManager\Exceptions\InvalidConfigException;
 use Modelesque\ApiTokenManager\Exceptions\PKCEAuthorizationRequiredException;
+use Modelesque\ApiTokenManager\Helpers\Config;
 use Modelesque\ApiTokenManager\Models\ApiToken;
 use Modelesque\ApiTokenManager\Providers\ApiClientServiceProvider;
 use Illuminate\Http\Client\ConnectionException;
@@ -153,7 +156,7 @@ class PKCEAuthTokenProvider extends AuthTokenProvider implements OAuth2TokenProv
                 )
             );
         }
-        catch (\Exception) {}
+        catch (Exception) {}
 
         return $this->codeVerifier;
     }
@@ -183,11 +186,16 @@ class PKCEAuthTokenProvider extends AuthTokenProvider implements OAuth2TokenProv
         }
     }
 
-    /** @return string */
+    /**
+     * @return string
+     * @throws InvalidConfigException
+     */
     public function getRedirectUrl(): string
     {
         if (! $this->redirectUrl) {
-            $this->setRedirectUrl($this->configFind('redirect_uri'));
+            $this->setRedirectUrl(
+                Config::getRequired($this->configKey, 'redirect_uri', $this->account)
+            );
         }
 
         return $this->redirectUrl;
@@ -199,6 +207,7 @@ class PKCEAuthTokenProvider extends AuthTokenProvider implements OAuth2TokenProv
      *
      * @param string $state
      * @return array
+     * @throws InvalidConfigException
      * @see authorizeUrl
      */
     #[ArrayShape([
@@ -212,7 +221,7 @@ class PKCEAuthTokenProvider extends AuthTokenProvider implements OAuth2TokenProv
     ])]
     public function authorizeUrlParams(string $state = ''): array
     {
-        $scope = $this->configFind('scope') ?? [];
+        $scope = Config::get($this->configKey, 'scope', $this->account, []);
 
         return [
             'client_id' => $this->clientId(),
@@ -225,7 +234,10 @@ class PKCEAuthTokenProvider extends AuthTokenProvider implements OAuth2TokenProv
         ];
     }
 
-    /** @inheritdoc */
+    /**
+     * @inheritdoc
+     * @throws InvalidConfigException
+     */
     public function authorize(): RedirectResponse
     {
         /** @var Request $request */
@@ -259,7 +271,7 @@ class PKCEAuthTokenProvider extends AuthTokenProvider implements OAuth2TokenProv
         ]);
 
         // construct the url to the API's auth page
-        $url = $this->configFind('base_auth_url') ?? $this->throwConfigException('base_auth_url');
+        $url = Config::getRequired($this->configKey, 'base_auth_url', $this->account);
         $params = $this->authorizeUrlParams($state);
 
         return redirect()->away($url . '?' . http_build_query($params));
