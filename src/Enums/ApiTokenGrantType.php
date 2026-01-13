@@ -4,7 +4,7 @@ namespace Modelesque\ApiTokenManager\Enums;
 
 enum ApiTokenGrantType: string
 {
-    case PKCE = 'authorization_code';
+    case AUTHORIZATION_CODE = 'authorization_code';
     case REFRESH_TOKEN = 'refresh_token';
     case CLIENT_CREDENTIALS = 'client_credentials';
 
@@ -12,7 +12,7 @@ enum ApiTokenGrantType: string
     public function label(): string
     {
         return match ($this) {
-            self::PKCE => 'PKCE Authorization Code Flow',
+            self::AUTHORIZATION_CODE => 'PKCE Authorization Code Flow',
             self::REFRESH_TOKEN => 'PKCE Refresh Token',
             self::CLIENT_CREDENTIALS => 'Client Credentials',
         };
@@ -26,7 +26,7 @@ enum ApiTokenGrantType: string
      */
     public static function isOAuth2(mixed $authType): bool
     {
-        return $authType === self::PKCE->value ||
+        return $authType === self::AUTHORIZATION_CODE->value ||
             $authType === self::CLIENT_CREDENTIALS->value ||
             $authType === self::REFRESH_TOKEN->value;
     }
@@ -40,7 +40,7 @@ enum ApiTokenGrantType: string
      */
     public static function hasRefreshToken(mixed $authType): bool
     {
-        return $authType === self::PKCE->value ||
+        return $authType === self::AUTHORIZATION_CODE->value ||
             $authType === self::REFRESH_TOKEN->value;
     }
 }

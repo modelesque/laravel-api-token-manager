@@ -52,7 +52,7 @@ class TokenManager
         // no saved token, so get a new one
         /** @var OAuth2TokenProviderInterface $provider */
         $provider = match ($grantType) {
-            ApiTokenGrantType::PKCE->value => new AuthCodeTokenProvider($configKey, $account),
+            ApiTokenGrantType::AUTHORIZATION_CODE->value => new AuthCodeTokenProvider($configKey, $account),
             ApiTokenGrantType::CLIENT_CREDENTIALS->value => new ClientCredentialsTokenProvider($configKey,$account),
             default => throw new RuntimeException("Unsupported token grant type: $grantType"),
         };

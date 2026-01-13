@@ -33,7 +33,7 @@ abstract class BaseClient
                 $this->configKey,
                 'default_grant_type',
                 $this->account,
-                ApiTokenGrantType::PKCE->value
+                ApiTokenGrantType::AUTHORIZATION_CODE->value
             );
         }
     }

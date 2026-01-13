@@ -82,7 +82,7 @@ class AuthCodeTokenProvider extends BaseTokenProvider implements OAuth2TokenProv
     protected function postForNewToken(): array
     {
         $response = $this->postRequestForToken(array_filter([
-            'grant_type' => ApiTokenGrantType::PKCE->value,
+            'grant_type' => ApiTokenGrantType::AUTHORIZATION_CODE->value,
             'client_id' => $this->clientId() ?: false,
             'code' => $this->code,
             'redirect_uri' => $this->getRedirectUrl(),
@@ -330,12 +330,12 @@ class AuthCodeTokenProvider extends BaseTokenProvider implements OAuth2TokenProv
         // post for the new token and save it to the db
         try {
             $payload = $this->postForNewToken();
-            $payload['grant_type'] = ApiTokenGrantType::PKCE->value;
+            $payload['grant_type'] = ApiTokenGrantType::AUTHORIZATION_CODE->value;
             app()->make(ApiTokenRepositoryInterface::class)
                 ->saveToken(
                     $this->configKey,
                     $this->account,
-                    ApiTokenGrantType::PKCE->value,
+                    ApiTokenGrantType::AUTHORIZATION_CODE->value,
                     $payload
                 );
             $message = sprintf("%s access token saved.", $this->name());
