@@ -6,7 +6,7 @@ use Modelesque\ApiTokenManager\Contracts\ApiTokenRepositoryInterface;
 use Modelesque\ApiTokenManager\Contracts\PKCEAuthCodeFlowInterface;
 use Modelesque\ApiTokenManager\Factories\ApiClientFactory;
 use Modelesque\ApiTokenManager\Repositories\EloquentApiTokenRepository;
-use Modelesque\ApiTokenManager\Services\Providers\PKCEAuthTokenProvider;
+use Modelesque\ApiTokenManager\Services\Providers\AuthCodeFlowTokenProvider;
 use Illuminate\Support\ServiceProvider;
 
 class ApiTokenManagerServiceProvider extends ServiceProvider
@@ -15,7 +15,7 @@ class ApiTokenManagerServiceProvider extends ServiceProvider
     {
         $this->app->singleton(ApiClientFactory::class);
         $this->app->singleton(TokenManager::class);
-        $this->app->bind(PKCEAuthCodeFlowInterface::class, PKCEAuthTokenProvider::class);
+        $this->app->bind(PKCEAuthCodeFlowInterface::class, AuthCodeFlowTokenProvider::class);
         $this->app->bind(ApiTokenRepositoryInterface::class, EloquentApiTokenRepository::class);
 
         // provide a fallback config that can be overwritten by hosts using this package

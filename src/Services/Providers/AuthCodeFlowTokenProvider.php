@@ -24,7 +24,7 @@ use InvalidArgumentException;
 use JetBrains\PhpStorm\ArrayShape;
 use Throwable;
 
-class PKCEAuthTokenProvider extends AuthTokenProvider implements OAuth2TokenProviderInterface,PKCEAuthCodeFlowInterface
+class AuthCodeFlowTokenProvider extends AuthTokenProvider implements OAuth2TokenProviderInterface,PKCEAuthCodeFlowInterface
 {
     /** @var string The name of the property in a controller that app()->makeWith() was set to. */
     public string $property = '';

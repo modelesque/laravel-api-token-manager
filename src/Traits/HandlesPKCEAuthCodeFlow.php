@@ -4,14 +4,14 @@ namespace Modelesque\ApiTokenManager\Traits;
 
 use Modelesque\ApiTokenManager\Abstracts\BaseClient;
 use Modelesque\ApiTokenManager\Contracts\PKCEAuthCodeFlowInterface;
-use Modelesque\ApiTokenManager\Services\Providers\PKCEAuthTokenProvider;
+use Modelesque\ApiTokenManager\Services\Providers\AuthCodeFlowTokenProvider;
 
 /**
  * @mixin BaseClient
  */
-trait HandlesPKCEAuthCodeFlow
+trait HandlesAuthCodeFlow
 {
-    protected PKCEAuthTokenProvider|null $provider = null;
+    protected AuthCodeFlowTokenProvider|null $provider = null;
 
     /**
      * Get the PKCE token provider to handle Authorization Code Flow process.
@@ -27,7 +27,7 @@ trait HandlesPKCEAuthCodeFlow
             return $this->provider;
         }
 
-        $this->provider = new PKCEAuthTokenProvider(
+        $this->provider = new AuthCodeFlowTokenProvider(
             $this->configKey,
             $this->account,
             $retryAttempts,
