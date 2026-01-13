@@ -8,7 +8,7 @@ use Modelesque\ApiTokenManager\Enums\ApiTokenGrantType;
 use Modelesque\ApiTokenManager\Exceptions\InvalidConfigException;
 use Modelesque\ApiTokenManager\Exceptions\AuthCodeFlowRequiredException;
 use Modelesque\ApiTokenManager\Helpers\Config;
-use Modelesque\ApiTokenManager\Services\Providers\ClientCredentialsAuthTokenProvider;
+use Modelesque\ApiTokenManager\Services\Providers\ClientCredentialsTokenProvider;
 use Modelesque\ApiTokenManager\Services\Providers\AuthCodeFlowTokenProvider;
 use Illuminate\Http\Client\ConnectionException;
 use RuntimeException;
@@ -53,7 +53,7 @@ class TokenManager
         /** @var OAuth2TokenProviderInterface $provider */
         $provider = match ($grantType) {
             ApiTokenGrantType::PKCE->value => new AuthCodeFlowTokenProvider($configKey, $account),
-            ApiTokenGrantType::CLIENT_CREDENTIALS->value => new ClientCredentialsAuthTokenProvider($configKey,$account),
+            ApiTokenGrantType::CLIENT_CREDENTIALS->value => new ClientCredentialsTokenProvider($configKey,$account),
             default => throw new RuntimeException("Unsupported token grant type: $grantType"),
         };
 

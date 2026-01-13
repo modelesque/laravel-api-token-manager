@@ -7,7 +7,7 @@ use Modelesque\ApiTokenManager\Contracts\OAuth2TokenProviderInterface;
 use Modelesque\ApiTokenManager\Enums\ApiTokenGrantType;
 use Modelesque\ApiTokenManager\Models\ApiToken;
 
-class ClientCredentialsAuthTokenProvider extends AuthTokenProvider implements OAuth2TokenProviderInterface
+class ClientCredentialsTokenProvider extends AuthTokenProvider implements OAuth2TokenProviderInterface
 {
     /** @inheritdoc */
     public function requestToken(?ApiToken $token): array
