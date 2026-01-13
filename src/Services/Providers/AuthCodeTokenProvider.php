@@ -26,8 +26,8 @@ use Throwable;
 
 class AuthCodeTokenProvider extends BaseTokenProvider implements OAuth2TokenProviderInterface,AuthCodeTokenProviderInterface
 {
-    /** @var string The name of the property in a controller that app()->makeWith() was set to. */
-    public string $property = '';
+    /** @var bool */
+    public bool $usesPkce = false;
 
     /** @var string The code obtained from the auth redirect. */
     public string $code = '';
@@ -48,6 +48,7 @@ class AuthCodeTokenProvider extends BaseTokenProvider implements OAuth2TokenProv
     {
         parent::__construct($configKey, $account, $retryAttempts, $retrySleepMs);
         $this->setRedirectUrl($redirectUri);
+        $this->usesPkce = (bool)Config::get($configKey, 'uses_pkce', $account, false);
     }
 
     /** @inheritdoc */
@@ -78,14 +79,18 @@ class AuthCodeTokenProvider extends BaseTokenProvider implements OAuth2TokenProv
      *
      * @return array
      * @throws ConnectionException
+     * @throws InvalidConfigException
      */
     protected function postForNewToken(): array
     {
         $response = $this->postRequestForToken(array_filter([
             'grant_type' => ApiTokenGrantType::AUTHORIZATION_CODE->value,
-            'client_id' => $this->clientId() ?: false,
+            'client_id' => $this->clientId(),
+            'client_secret' => $this->usesPkce ? false : $this->clientSecret(),
             'code' => $this->code,
             'redirect_uri' => $this->getRedirectUrl(),
+
+            // needed for PKCE
             'code_verifier' => $this->getCodeVerifier(),
         ]));
 
@@ -98,6 +103,7 @@ class AuthCodeTokenProvider extends BaseTokenProvider implements OAuth2TokenProv
      * @param string $refreshToken
      * @return array
      * @throws ConnectionException
+     * @throws InvalidConfigException
      */
     protected function postToRefreshExpiredToken(string $refreshToken): array
     {
@@ -223,15 +229,19 @@ class AuthCodeTokenProvider extends BaseTokenProvider implements OAuth2TokenProv
     {
         $scope = Config::get($this->configKey, 'scope', $this->account, []);
 
-        return [
+        return array_filter([
             'client_id' => $this->clientId(),
-            'code_challenge' => $this->getCodeChallenge($this->getCodeVerifier()),
-            'code_challenge_method' => 'S256',
             'redirect_uri' => $this->getRedirectUrl(),
             'response_type' => 'code',
-            'scope' => implode(' ', $scope),
+            'scope' => is_array($scope) ? implode(' ', $scope) : false,
             'state' => $state,
-        ];
+
+            // needed for PKCE
+            'code_challenge_method' => $this->usesPkce ? 'S256' : false,
+            'code_challenge' => $this->usesPkce
+                ? $this->getCodeChallenge($this->getCodeVerifier())
+                : false,
+        ]);
     }
 
     /**

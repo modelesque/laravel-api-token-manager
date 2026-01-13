@@ -49,7 +49,7 @@ abstract class BaseTokenProvider
      */
     protected function clientId(): string
     {
-        return Config::get($this->configKey, 'client_id', $this->account);
+        return Config::getRequired($this->configKey, 'client_id', $this->account);
     }
 
     /**
@@ -58,7 +58,7 @@ abstract class BaseTokenProvider
      */
     protected function clientSecret(): string
     {
-        return Config::get($this->configKey, 'client_secret', $this->account);
+        return Config::getRequired($this->configKey, 'client_secret', $this->account);
     }
 
     /**
