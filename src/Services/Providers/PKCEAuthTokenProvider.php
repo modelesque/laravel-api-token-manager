@@ -10,7 +10,7 @@ use Modelesque\ApiTokenManager\Contracts\PKCEAuthCodeFlowInterface;
 use Modelesque\ApiTokenManager\Contracts\PKCETokenProviderInterface;
 use Modelesque\ApiTokenManager\Enums\ApiTokenGrantType;
 use Modelesque\ApiTokenManager\Exceptions\InvalidConfigException;
-use Modelesque\ApiTokenManager\Exceptions\PKCEAuthorizationRequiredException;
+use Modelesque\ApiTokenManager\Exceptions\AuthCodeFlowRequiredException;
 use Modelesque\ApiTokenManager\Helpers\Config;
 use Modelesque\ApiTokenManager\Models\ApiToken;
 use Modelesque\ApiTokenManager\Providers\ApiClientServiceProvider;
@@ -68,7 +68,7 @@ class PKCEAuthTokenProvider extends AuthTokenProvider implements OAuth2TokenProv
         }
 
         // authorization is required on the API's site before requesting a fresh token
-        throw new PKCEAuthorizationRequiredException();
+        throw new AuthCodeFlowRequiredException();
     }
 
     /**

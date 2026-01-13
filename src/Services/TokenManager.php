@@ -6,7 +6,7 @@ use Modelesque\ApiTokenManager\Contracts\ApiTokenRepositoryInterface;
 use Modelesque\ApiTokenManager\Contracts\OAuth2TokenProviderInterface;
 use Modelesque\ApiTokenManager\Enums\ApiTokenGrantType;
 use Modelesque\ApiTokenManager\Exceptions\InvalidConfigException;
-use Modelesque\ApiTokenManager\Exceptions\PKCEAuthorizationRequiredException;
+use Modelesque\ApiTokenManager\Exceptions\AuthCodeFlowRequiredException;
 use Modelesque\ApiTokenManager\Helpers\Config;
 use Modelesque\ApiTokenManager\Services\Providers\ClientCredentialsAuthTokenProvider;
 use Modelesque\ApiTokenManager\Services\Providers\PKCEAuthTokenProvider;
@@ -27,7 +27,7 @@ class TokenManager
      * @param string $grantType
      * @return string|null
      * @throws ConnectionException
-     * @throws PKCEAuthorizationRequiredException
+     * @throws AuthCodeFlowRequiredException
      * @throws InvalidConfigException
      */
     public function getToken(string $configKey, string $account, string $grantType): ?string

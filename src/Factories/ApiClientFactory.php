@@ -4,7 +4,7 @@ namespace Modelesque\ApiTokenManager\Factories;
 
 use Modelesque\ApiTokenManager\Enums\ApiTokenGrantType;
 use Modelesque\ApiTokenManager\Exceptions\InvalidConfigException;
-use Modelesque\ApiTokenManager\Exceptions\PKCEAuthorizationRequiredException;
+use Modelesque\ApiTokenManager\Exceptions\AuthCodeFlowRequiredException;
 use Modelesque\ApiTokenManager\Helpers\Config;
 use Modelesque\ApiTokenManager\Services\TokenManager;
 use Illuminate\Http\Client\ConnectionException;
@@ -25,7 +25,7 @@ class ApiClientFactory
      * @param string $grantType
      * @return PendingRequest
      * @throws ConnectionException
-     * @throws PKCEAuthorizationRequiredException
+     * @throws AuthCodeFlowRequiredException
      * @throws InvalidConfigException
      */
     public function make(string $provider, string $account, string $grantType): PendingRequest

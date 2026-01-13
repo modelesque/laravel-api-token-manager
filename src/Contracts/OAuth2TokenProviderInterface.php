@@ -2,7 +2,7 @@
 
 namespace Modelesque\ApiTokenManager\Contracts;
 
-use Modelesque\ApiTokenManager\Exceptions\PKCEAuthorizationRequiredException;
+use Modelesque\ApiTokenManager\Exceptions\AuthCodeFlowRequiredException;
 use Modelesque\ApiTokenManager\Models\ApiToken;
 use Illuminate\Http\Client\ConnectionException;
 use Modelesque\ApiTokenManager\Services\Providers\ClientCredentialsAuthTokenProvider;
@@ -20,7 +20,7 @@ interface OAuth2TokenProviderInterface
      * @param ApiToken|null $token
      * @return array
      * @throws ConnectionException
-     * @throws PKCEAuthorizationRequiredException
+     * @throws AuthCodeFlowRequiredException
      */
     public function requestToken(?ApiToken $token): array;
 }
