@@ -1,0 +1,28 @@
+<?php
+
+namespace Modelesque\ApiTokenManager\Contracts;
+
+use Modelesque\ApiTokenManager\Exceptions\AuthCodeFlowRequiredException;
+use Modelesque\ApiTokenManager\Exceptions\InvalidConfigException;
+use Modelesque\ApiTokenManager\Models\ApiToken;
+use Illuminate\Http\Client\ConnectionException;
+use Modelesque\ApiTokenManager\Services\Providers\ClientCredentialsTokenProvider;
+use Modelesque\ApiTokenManager\Services\Providers\AuthCodeTokenProvider;
+
+/**
+ * @see ClientCredentialsTokenProvider
+ * @see AuthCodeTokenProvider
+ */
+interface OAuth2TokenProviderInterface
+{
+    /**
+     * Request an auth token from the API provider.
+     *
+     * @param ApiToken|null $token
+     * @return array
+     * @throws ConnectionException
+     * @throws AuthCodeFlowRequiredException
+     * @throws InvalidConfigException
+     */
+    public function requestToken(?ApiToken $token): array;
+}
