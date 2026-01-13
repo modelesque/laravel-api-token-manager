@@ -30,17 +30,4 @@ enum ApiTokenGrantType: string
             $authType === self::CLIENT_CREDENTIALS->value ||
             $authType === self::REFRESH_TOKEN->value;
     }
-
-    /**
-     * If the grant type incorporates a refresh system, whereby a 'refresh_token' is
-     * stored to refresh an expired token.
-     *
-     * @param mixed $authType
-     * @return bool
-     */
-    public static function hasRefreshToken(mixed $authType): bool
-    {
-        return $authType === self::AUTHORIZATION_CODE->value ||
-            $authType === self::REFRESH_TOKEN->value;
-    }
 }

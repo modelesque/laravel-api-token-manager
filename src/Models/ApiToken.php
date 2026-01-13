@@ -2,8 +2,20 @@
 
 namespace Modelesque\ApiTokenManager\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property string $account
+ * @property Carbon $expires_at
+ * @property string $grant_type
+ * @property array $meta
+ * @property string $provider
+ * @property string $refresh_token
+ * @property string $scope
+ * @property string $token
+ * @property string $token_type
+ */
 class ApiToken extends Model
 {
     /** @inheritdoc */

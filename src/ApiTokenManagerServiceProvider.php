@@ -1,13 +1,16 @@
-<?php
+<?php /** @noinspection ALL */
+
+/** @noinspection PhpUndefinedFunctionInspection */
 
 namespace Modelesque\ApiTokenManager;
 
 use Modelesque\ApiTokenManager\Contracts\ApiTokenRepositoryInterface;
-use Modelesque\ApiTokenManager\Contracts\AuthCodeTokenProviderInterface;
+use Modelesque\ApiTokenManager\Contracts\AuthCodeFlowInterface;
 use Modelesque\ApiTokenManager\Factories\ApiClientFactory;
 use Modelesque\ApiTokenManager\Repositories\EloquentApiTokenRepository;
 use Modelesque\ApiTokenManager\Services\Providers\AuthCodeTokenProvider;
 use Illuminate\Support\ServiceProvider;
+use Modelesque\ApiTokenManager\Services\TokenManager;
 
 class ApiTokenManagerServiceProvider extends ServiceProvider
 {
@@ -15,7 +18,7 @@ class ApiTokenManagerServiceProvider extends ServiceProvider
     {
         $this->app->singleton(ApiClientFactory::class);
         $this->app->singleton(TokenManager::class);
-        $this->app->bind(AuthCodeTokenProviderInterface::class, AuthCodeTokenProvider::class);
+        $this->app->bind(AuthCodeFlowInterface::class, AuthCodeTokenProvider::class);
         $this->app->bind(ApiTokenRepositoryInterface::class, EloquentApiTokenRepository::class);
 
         // provide a fallback config that can be overwritten by hosts using this package

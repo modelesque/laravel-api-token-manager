@@ -1,9 +1,10 @@
-<?php
+<?php /** @noinspection PhpUnused */
 
 namespace Modelesque\ApiTokenManager\Traits;
 
 use Modelesque\ApiTokenManager\Abstracts\BaseClient;
-use Modelesque\ApiTokenManager\Contracts\AuthCodeTokenProviderInterface;
+use Modelesque\ApiTokenManager\Contracts\AuthCodeFlowInterface;
+use Modelesque\ApiTokenManager\Exceptions\InvalidConfigException;
 use Modelesque\ApiTokenManager\Services\Providers\AuthCodeTokenProvider;
 
 /**
@@ -11,7 +12,7 @@ use Modelesque\ApiTokenManager\Services\Providers\AuthCodeTokenProvider;
  */
 trait HandlesAuthCodeFlow
 {
-    protected AuthCodeTokenProvider|null $provider = null;
+    protected AuthCodeTokenProvider|AuthCodeFlowInterface|null $provider = null;
 
     /**
      * Get the PKCE token provider to handle Authorization Code Flow process.
@@ -19,9 +20,14 @@ trait HandlesAuthCodeFlow
      * @param int $retryAttempts
      * @param int $retrySleepMs
      * @param string $redirectUri
-     * @return AuthCodeTokenProviderInterface
+     * @return AuthCodeFlowInterface
+     * @throws InvalidConfigException
      */
-    public function pkce(int $retryAttempts = 2, int $retrySleepMs = 150, string $redirectUri = ''): AuthCodeTokenProviderInterface
+    public function provider(
+        int $retryAttempts = 2,
+        int $retrySleepMs = 150,
+        string $redirectUri = ''
+    ): AuthCodeFlowInterface
     {
         if ($this->provider) {
             return $this->provider;

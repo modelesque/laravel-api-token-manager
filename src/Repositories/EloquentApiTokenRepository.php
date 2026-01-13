@@ -2,7 +2,6 @@
 
 namespace Modelesque\ApiTokenManager\Repositories;
 
-use Modelesque\ApiTokenManager\Abstracts\BaseRepository;
 use Modelesque\ApiTokenManager\Contracts\ApiTokenRepositoryInterface;
 use Modelesque\ApiTokenManager\Models\ApiToken;
 

@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpUndefinedFunctionInspection */
 
 namespace Modelesque\ApiTokenManager\Services\Providers;
 
@@ -6,14 +6,12 @@ use Exception;
 use Modelesque\ApiTokenManager\Abstracts\BaseTokenProvider;
 use Modelesque\ApiTokenManager\Contracts\ApiTokenRepositoryInterface;
 use Modelesque\ApiTokenManager\Contracts\OAuth2TokenProviderInterface;
-use Modelesque\ApiTokenManager\Contracts\AuthCodeTokenProviderInterface;
-use Modelesque\ApiTokenManager\Contracts\PKCETokenProviderInterface;
+use Modelesque\ApiTokenManager\Contracts\AuthCodeFlowInterface;
 use Modelesque\ApiTokenManager\Enums\ApiTokenGrantType;
 use Modelesque\ApiTokenManager\Exceptions\InvalidConfigException;
 use Modelesque\ApiTokenManager\Exceptions\AuthCodeFlowRequiredException;
 use Modelesque\ApiTokenManager\Helpers\Config;
 use Modelesque\ApiTokenManager\Models\ApiToken;
-use Modelesque\ApiTokenManager\Providers\ApiClientServiceProvider;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -24,7 +22,7 @@ use InvalidArgumentException;
 use JetBrains\PhpStorm\ArrayShape;
 use Throwable;
 
-class AuthCodeTokenProvider extends BaseTokenProvider implements OAuth2TokenProviderInterface,AuthCodeTokenProviderInterface
+class AuthCodeTokenProvider extends BaseTokenProvider implements OAuth2TokenProviderInterface,AuthCodeFlowInterface
 {
     /** @var bool */
     public bool $usesPkce = false;
@@ -38,6 +36,9 @@ class AuthCodeTokenProvider extends BaseTokenProvider implements OAuth2TokenProv
     /** @var string The string you provided when authenticating. */
     protected string $codeVerifier = '';
 
+    /**
+     * @throws InvalidConfigException
+     */
     public function __construct(
         string $configKey,
         string $account,
@@ -51,13 +52,14 @@ class AuthCodeTokenProvider extends BaseTokenProvider implements OAuth2TokenProv
         $this->usesPkce = (bool)Config::get($configKey, 'uses_pkce', $account, false);
     }
 
-    /** @inheritdoc */
+    /** @inheritdoc
+     * @throws InvalidConfigException
+     */
     public function requestToken(?ApiToken $token): array
     {
         /**
          * If returning to the redirect URL from the API's auth page, these properties
          * will get set when this class instantiates, so now a token can be requested.
-         * @see ApiClientServiceProvider::boot()
          */
         if ($this->code && $this->redirectUrl && $this->codeVerifier) {
             return $this->postForNewToken();

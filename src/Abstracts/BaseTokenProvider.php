@@ -2,6 +2,7 @@
 
 namespace Modelesque\ApiTokenManager\Abstracts;
 
+use Modelesque\ApiTokenManager\Contracts\AuthCodeFlowInterface;
 use Modelesque\ApiTokenManager\Enums\ApiAccount;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Response;
@@ -29,7 +30,7 @@ abstract class BaseTokenProvider
      * @return string A read-friendly name of the API provider (e.g. "Spotify").
      * @throws InvalidConfigException
      */
-    protected function name(): string
+    public function name(): string
     {
         return Config::getRequired($this->configKey, 'name', $this->account);
     }
@@ -70,7 +71,7 @@ abstract class BaseTokenProvider
         return Config::get($this->configKey, 'user_id', $this->account);
     }
 
-    /** @inheritdoc */
+    /** @see AuthCodeFlowInterface */
     public function sessionKey(): string
     {
         return implode('_', [
@@ -87,6 +88,7 @@ abstract class BaseTokenProvider
      * @param array $headers
      * @return array
      * @throws ConnectionException
+     * @throws InvalidConfigException
      */
     protected function postRequestForToken(array $bodyParams, array $headers = []): array
     {

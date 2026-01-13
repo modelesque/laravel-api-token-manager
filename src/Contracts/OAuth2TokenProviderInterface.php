@@ -3,6 +3,7 @@
 namespace Modelesque\ApiTokenManager\Contracts;
 
 use Modelesque\ApiTokenManager\Exceptions\AuthCodeFlowRequiredException;
+use Modelesque\ApiTokenManager\Exceptions\InvalidConfigException;
 use Modelesque\ApiTokenManager\Models\ApiToken;
 use Illuminate\Http\Client\ConnectionException;
 use Modelesque\ApiTokenManager\Services\Providers\ClientCredentialsTokenProvider;
@@ -21,6 +22,7 @@ interface OAuth2TokenProviderInterface
      * @return array
      * @throws ConnectionException
      * @throws AuthCodeFlowRequiredException
+     * @throws InvalidConfigException
      */
     public function requestToken(?ApiToken $token): array;
 }

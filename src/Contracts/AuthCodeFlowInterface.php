@@ -1,14 +1,15 @@
-<?php
+<?php /** @noinspection PhpUnused */
 
 namespace Modelesque\ApiTokenManager\Contracts;
 
 use Illuminate\Http\RedirectResponse;
+use Modelesque\ApiTokenManager\Exceptions\InvalidConfigException;
 use Modelesque\ApiTokenManager\Services\Providers\AuthCodeTokenProvider;
 
 /**
  * @see AuthCodeTokenProvider
  */
-interface AuthCodeTokenProviderInterface
+interface AuthCodeFlowInterface
 {
     /**
      * The key by which session variables will be stored if authorization requires
