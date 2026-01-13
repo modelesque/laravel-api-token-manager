@@ -3,10 +3,10 @@
 namespace Modelesque\ApiTokenManager\Services\Providers;
 
 use Exception;
-use Modelesque\ApiTokenManager\Abstracts\AuthTokenProvider;
+use Modelesque\ApiTokenManager\Abstracts\BaseTokenProvider;
 use Modelesque\ApiTokenManager\Contracts\ApiTokenRepositoryInterface;
 use Modelesque\ApiTokenManager\Contracts\OAuth2TokenProviderInterface;
-use Modelesque\ApiTokenManager\Contracts\PKCEAuthCodeFlowInterface;
+use Modelesque\ApiTokenManager\Contracts\AuthCodeTokenProviderInterface;
 use Modelesque\ApiTokenManager\Contracts\PKCETokenProviderInterface;
 use Modelesque\ApiTokenManager\Enums\ApiTokenGrantType;
 use Modelesque\ApiTokenManager\Exceptions\InvalidConfigException;
@@ -24,7 +24,7 @@ use InvalidArgumentException;
 use JetBrains\PhpStorm\ArrayShape;
 use Throwable;
 
-class AuthCodeFlowTokenProvider extends AuthTokenProvider implements OAuth2TokenProviderInterface,PKCEAuthCodeFlowInterface
+class AuthCodeTokenProvider extends BaseTokenProvider implements OAuth2TokenProviderInterface,AuthCodeTokenProviderInterface
 {
     /** @var string The name of the property in a controller that app()->makeWith() was set to. */
     public string $property = '';

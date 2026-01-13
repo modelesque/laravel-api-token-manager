@@ -3,12 +3,12 @@
 namespace Modelesque\ApiTokenManager\Contracts;
 
 use Illuminate\Http\RedirectResponse;
-use Modelesque\ApiTokenManager\Services\Providers\AuthCodeFlowTokenProvider;
+use Modelesque\ApiTokenManager\Services\Providers\AuthCodeTokenProvider;
 
 /**
- * @see AuthCodeFlowTokenProvider
+ * @see AuthCodeTokenProvider
  */
-interface PKCEAuthCodeFlowInterface
+interface AuthCodeTokenProviderInterface
 {
     /**
      * The key by which session variables will be stored if authorization requires

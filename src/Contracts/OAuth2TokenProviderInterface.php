@@ -6,11 +6,11 @@ use Modelesque\ApiTokenManager\Exceptions\AuthCodeFlowRequiredException;
 use Modelesque\ApiTokenManager\Models\ApiToken;
 use Illuminate\Http\Client\ConnectionException;
 use Modelesque\ApiTokenManager\Services\Providers\ClientCredentialsTokenProvider;
-use Modelesque\ApiTokenManager\Services\Providers\AuthCodeFlowTokenProvider;
+use Modelesque\ApiTokenManager\Services\Providers\AuthCodeTokenProvider;
 
 /**
  * @see ClientCredentialsTokenProvider
- * @see AuthCodeFlowTokenProvider
+ * @see AuthCodeTokenProvider
  */
 interface OAuth2TokenProviderInterface
 {

@@ -12,7 +12,7 @@ use Modelesque\ApiTokenManager\Helpers\Config;
 use RuntimeException;
 use Throwable;
 
-abstract class AuthTokenProvider
+abstract class BaseTokenProvider
 {
     public function __construct(
         public string $configKey,

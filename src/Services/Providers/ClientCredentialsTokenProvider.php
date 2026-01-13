@@ -2,12 +2,12 @@
 
 namespace Modelesque\ApiTokenManager\Services\Providers;
 
-use Modelesque\ApiTokenManager\Abstracts\AuthTokenProvider;
+use Modelesque\ApiTokenManager\Abstracts\BaseTokenProvider;
 use Modelesque\ApiTokenManager\Contracts\OAuth2TokenProviderInterface;
 use Modelesque\ApiTokenManager\Enums\ApiTokenGrantType;
 use Modelesque\ApiTokenManager\Models\ApiToken;
 
-class ClientCredentialsTokenProvider extends AuthTokenProvider implements OAuth2TokenProviderInterface
+class ClientCredentialsTokenProvider extends BaseTokenProvider implements OAuth2TokenProviderInterface
 {
     /** @inheritdoc */
     public function requestToken(?ApiToken $token): array
