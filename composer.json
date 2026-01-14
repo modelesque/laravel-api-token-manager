@@ -8,6 +8,7 @@
   "require": {
     "php": "^8.1",
     "illuminate/database": "^12.46",
+    "illuminate/events": "^12.47",
     "illuminate/http": "^12.46",
     "illuminate/support": "^12.46"
   },

@@ -8,6 +8,7 @@ use Modelesque\ApiTokenManager\Contracts\ApiTokenRepositoryInterface;
 use Modelesque\ApiTokenManager\Contracts\OAuth2TokenProviderInterface;
 use Modelesque\ApiTokenManager\Contracts\AuthCodeFlowInterface;
 use Modelesque\ApiTokenManager\Enums\ApiTokenGrantType;
+use Modelesque\ApiTokenManager\Events\ConstructAuthUrlParamsEvent;
 use Modelesque\ApiTokenManager\Exceptions\InvalidConfigException;
 use Modelesque\ApiTokenManager\Exceptions\AuthCodeFlowRequiredException;
 use Modelesque\ApiTokenManager\Helpers\Config;
@@ -217,8 +218,7 @@ class AuthCodeTokenProvider extends BaseTokenProvider implements OAuth2TokenProv
     }
 
     /**
-     * The query params that will be added to the query string when requesting an auth
-     * code from an API during the PKCE process.
+     * The query params that will be added to the authorization's URL query string.
      *
      * @param string $state
      * @return array
@@ -238,7 +238,7 @@ class AuthCodeTokenProvider extends BaseTokenProvider implements OAuth2TokenProv
     {
         $scope = Config::get($this->configKey, 'scope', $this->account, []);
 
-        return array_filter([
+        $params = array_filter([
             'client_id' => $this->clientId(),
             'redirect_uri' => $this->getRedirectUrl(),
             'response_type' => 'code',
@@ -251,6 +251,15 @@ class AuthCodeTokenProvider extends BaseTokenProvider implements OAuth2TokenProv
                 ? $this->getCodeChallenge($this->getCodeVerifier())
                 : false,
         ]);
+
+        // allow API packages to add additional params or modify the ones above
+        app('events')->dispatch(new ConstructAuthUrlParamsEvent(
+            $params,
+            $this->configKey,
+            $this->account
+        ));
+
+        return $params;
     }
 
     /**
