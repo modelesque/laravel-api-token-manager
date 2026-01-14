@@ -85,16 +85,23 @@ class AuthCodeTokenProvider extends BaseTokenProvider implements OAuth2TokenProv
      */
     protected function postForNewToken(): array
     {
-        $response = $this->postRequestForToken(array_filter([
+        $headers = [];
+        $params = array_filter([
             'grant_type' => ApiTokenGrantType::AUTHORIZATION_CODE->value,
             'client_id' => $this->clientId(),
-            'client_secret' => $this->usesPkce ? false : $this->clientSecret(),
             'code' => $this->code,
             'redirect_uri' => $this->getRedirectUrl(),
+        ]);
 
-            // needed for PKCE
-            'code_verifier' => $this->getCodeVerifier(),
-        ]));
+        if ($this->usesPkce) {
+            $params['code_verifier'] = $this->getCodeVerifier();
+        }
+        else {
+            $authorization = implode(':', [$this->clientId(), $this->clientSecret()]);
+            $headers = ['Authorization' => 'Basic ' . base64_encode($authorization)];
+        }
+
+        $response = $this->postRequestForToken($params, $headers);
 
         return $this->normalizeResponse($response);
     }
