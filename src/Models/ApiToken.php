@@ -38,4 +38,15 @@ class ApiToken extends Model
         'refresh_token' => 'encrypted',
         'token' => 'encrypted',
     ];
+
+    /**
+     * Check if the ApiToken hasn't expired. Note that a `null` value for `expires_at`
+     * would mean the token is valid indefinitely.
+     *
+     * @return bool
+     */
+    public function isValid(): bool
+    {
+        return $this->expires_at?->greaterThan(now()->subSeconds(30)) ?? true;
+    }
 }

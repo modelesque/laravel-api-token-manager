@@ -38,15 +38,11 @@ class TokenManager
             $account,
             $grantType
         );
-        if (
-            $savedToken &&
-            $savedToken->expires_at &&
-            $savedToken->expires_at->greaterThan(now()->subSeconds(30))
-        ) {
+        if ($savedToken && $savedToken->isValid()) {
             return $savedToken->token;
         }
 
-        // ensure we have a config array
+        // ensure we have a config array for the API that needs a token
         Config::getProvider($configKey);
 
         // no saved token, so get a new one

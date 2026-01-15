@@ -33,13 +33,13 @@ trait HandlesAuthCodeFlow
             return $this->provider;
         }
 
-        $this->provider = new AuthCodeTokenProvider(
-            $this->configKey,
-            $this->account,
-            $retryAttempts,
-            $retrySleepMs,
-            $redirectUri
-        );
+        $this->provider = app()->makeWith(AuthCodeFlowInterface::class, [
+            'configKey' => $this->configKey,
+            'account' => $this->account,
+            'retryAttempts' => $retryAttempts,
+            'retrySleepMs' => $retrySleepMs,
+            'redirectUri' => $redirectUri,
+        ]);
 
         return $this->provider;
     }

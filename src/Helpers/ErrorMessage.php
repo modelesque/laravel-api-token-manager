@@ -18,7 +18,7 @@ class ErrorMessage
      * @see message
      */
     #[Pure]
-    public static function forGetRequest(string $resource, string $title, string $platform, string $loop = ''): string
+    public static function forGetRequest(string $resource, string $title = '', string $platform = '', string $loop = ''): string
     {
         return self::message('GET', $resource, $title, $platform, $loop);
     }
@@ -32,7 +32,7 @@ class ErrorMessage
      * @see message
      */
     #[Pure]
-    public static function forPostRequest(string $resource, string $title, string $platform, string $loop = ''): string
+    public static function forPostRequest(string $resource, string $title = '', string $platform = '', string $loop = ''): string
     {
         return self::message('POST', $resource, $title, $platform, $loop);
     }
@@ -46,7 +46,7 @@ class ErrorMessage
      * @see message
      */
     #[Pure]
-    public static function forPatchRequest(string $resource, string $title, string $platform, string $loop = ''): string
+    public static function forPatchRequest(string $resource, string $title = '', string $platform = '', string $loop = ''): string
     {
         return self::message('PATCH', $resource, $title, $platform, $loop);
     }
@@ -60,7 +60,7 @@ class ErrorMessage
      * @see message
      */
     #[Pure]
-    public static function forPutRequest(string $resource, string $title, string $platform, string $loop = ''): string
+    public static function forPutRequest(string $resource, string $title = '', string $platform = '', string $loop = ''): string
     {
         return self::message('PUT', $resource, $title, $platform, $loop);
     }
@@ -74,7 +74,7 @@ class ErrorMessage
      * @see message
      */
     #[Pure]
-    public static function forDeleteRequest(string $resource, string $title, string $platform, string $loop = ''): string
+    public static function forDeleteRequest(string $resource, string $title = '', string $platform = '', string $loop = ''): string
     {
         return self::message('DELETE', $resource, $title, $platform, $loop);
     }
@@ -88,15 +88,15 @@ class ErrorMessage
      * @return string
      */
     #[Pure]
-    public static function message(string $method, string $resource, string $title, string $provider, string $loop): string
+    public static function message(string $method, string $resource, string $title = '', string $provider = '', string $loop = ''): string
     {
         return sprintf(
-            '%sError making %s request for %s "%s" from %s',
-            $loop,
+            '%sError making %s request for %s%s%s.',
+            ($loop ? "$loop " : ''),
             $method,
             $resource,
-            $title,
-            $provider
+            ($title ? " \"$title\"" : ''),
+            ($provider ? " from $provider" : '')
         );
     }
 

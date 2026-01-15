@@ -8,6 +8,7 @@ use Modelesque\ApiTokenManager\Contracts\ApiTokenRepositoryInterface;
 use Modelesque\ApiTokenManager\Contracts\OAuth2TokenProviderInterface;
 use Modelesque\ApiTokenManager\Contracts\AuthCodeFlowInterface;
 use Modelesque\ApiTokenManager\Enums\ApiTokenGrantType;
+use Modelesque\ApiTokenManager\Events\ConstructAuthUrlParamsEvent;
 use Modelesque\ApiTokenManager\Exceptions\InvalidConfigException;
 use Modelesque\ApiTokenManager\Exceptions\AuthCodeFlowRequiredException;
 use Modelesque\ApiTokenManager\Helpers\Config;
@@ -85,16 +86,23 @@ class AuthCodeTokenProvider extends BaseTokenProvider implements OAuth2TokenProv
      */
     protected function postForNewToken(): array
     {
-        $response = $this->postRequestForToken(array_filter([
+        $headers = [];
+        $params = array_filter([
             'grant_type' => ApiTokenGrantType::AUTHORIZATION_CODE->value,
             'client_id' => $this->clientId(),
-            'client_secret' => $this->usesPkce ? false : $this->clientSecret(),
             'code' => $this->code,
             'redirect_uri' => $this->getRedirectUrl(),
+        ]);
 
-            // needed for PKCE
-            'code_verifier' => $this->getCodeVerifier(),
-        ]));
+        if ($this->usesPkce) {
+            $params['code_verifier'] = $this->getCodeVerifier();
+        }
+        else {
+            $authorization = implode(':', [$this->clientId(), $this->clientSecret()]);
+            $headers = ['Authorization' => 'Basic ' . base64_encode($authorization)];
+        }
+
+        $response = $this->postRequestForToken($params, $headers);
 
         return $this->normalizeResponse($response);
     }
@@ -210,8 +218,7 @@ class AuthCodeTokenProvider extends BaseTokenProvider implements OAuth2TokenProv
     }
 
     /**
-     * The query params that will be added to the query string when requesting an auth
-     * code from an API during the PKCE process.
+     * The query params that will be added to the authorization's URL query string.
      *
      * @param string $state
      * @return array
@@ -231,7 +238,7 @@ class AuthCodeTokenProvider extends BaseTokenProvider implements OAuth2TokenProv
     {
         $scope = Config::get($this->configKey, 'scope', $this->account, []);
 
-        return array_filter([
+        $params = array_filter([
             'client_id' => $this->clientId(),
             'redirect_uri' => $this->getRedirectUrl(),
             'response_type' => 'code',
@@ -244,6 +251,15 @@ class AuthCodeTokenProvider extends BaseTokenProvider implements OAuth2TokenProv
                 ? $this->getCodeChallenge($this->getCodeVerifier())
                 : false,
         ]);
+
+        // allow API packages to add additional params or modify the ones above
+        app('events')->dispatch(new ConstructAuthUrlParamsEvent(
+            $params,
+            $this->configKey,
+            $this->account
+        ));
+
+        return $params;
     }
 
     /**
@@ -295,8 +311,12 @@ class AuthCodeTokenProvider extends BaseTokenProvider implements OAuth2TokenProv
         /** @var Request $request */
         $request = request();
 
-        // unpack the session variables
         $sessionVars = $request->session()->get($this->sessionKey());
+        if (! is_array($sessionVars)) {
+            throw new InvalidArgumentException('Auth Code Flow session state missing or expired.');
+        }
+
+        // unpack the session variables
         [
             'actionUrl' => $actionUrl,
             'codeVerifier' => $codeVerifier,
