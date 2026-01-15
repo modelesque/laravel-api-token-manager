@@ -37,4 +37,28 @@ abstract class BaseClient
             );
         }
     }
+
+    public function getConfigKey(): string
+    {
+        return $this->configKey;
+    }
+
+    public function getAccount(): string
+    {
+        return $this->account;
+    }
+
+    public function getGrantType(): string
+    {
+        return $this->grantType;
+    }
+
+    public function debug(): array
+    {
+        return [
+            'configKey' => $this->getConfigKey(),
+            'account' => $this->getAccount(),
+            'grantType' => $this->getGrantType(),
+        ];
+    }
 }
