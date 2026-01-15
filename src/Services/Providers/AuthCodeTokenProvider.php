@@ -311,8 +311,12 @@ class AuthCodeTokenProvider extends BaseTokenProvider implements OAuth2TokenProv
         /** @var Request $request */
         $request = request();
 
-        // unpack the session variables
         $sessionVars = $request->session()->get($this->sessionKey());
+        if (! is_array($sessionVars)) {
+            throw new InvalidArgumentException('Auth Code Flow session state missing or expired.');
+        }
+
+        // unpack the session variables
         [
             'actionUrl' => $actionUrl,
             'codeVerifier' => $codeVerifier,
