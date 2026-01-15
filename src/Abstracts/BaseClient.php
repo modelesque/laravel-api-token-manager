@@ -2,6 +2,8 @@
 
 namespace Modelesque\ApiTokenManager\Abstracts;
 
+use JetBrains\PhpStorm\ArrayShape;
+use JetBrains\PhpStorm\Pure;
 use Modelesque\ApiTokenManager\Enums\ApiAccount;
 use Modelesque\ApiTokenManager\Enums\ApiTokenGrantType;
 use Modelesque\ApiTokenManager\Exceptions\InvalidConfigException;
@@ -53,6 +55,8 @@ abstract class BaseClient
         return $this->grantType;
     }
 
+    #[Pure]
+    #[ArrayShape(['configKey' => "string", 'account' => "string", 'grantType' => "string"])]
     public function debug(): array
     {
         return [
