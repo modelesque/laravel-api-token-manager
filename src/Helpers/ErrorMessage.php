@@ -88,7 +88,7 @@ class ErrorMessage
      * @return string
      */
     #[Pure]
-    public static function message(string $method, string $resource, string $provider = '', string $title = '', string $loop = ''): string
+    public static function message(string $method, string $resource, string $title = '', string $provider = '', string $loop = ''): string
     {
         return sprintf(
             '%sError making %s request for %s%s%s.',
