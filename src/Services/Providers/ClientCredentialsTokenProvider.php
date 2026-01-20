@@ -39,10 +39,11 @@ class ClientCredentialsTokenProvider extends BaseTokenProvider implements OAuth2
         );
 
         return array_filter([
-            'token_type' => $tokenType,
-            'token' => $token ?? false,
             'expires_at' => $expiresAt ?: false,
+            'grant_type' => ApiTokenGrantType::CLIENT_CREDENTIALS->value,
             'meta' => $response,
+            'token' => $token ?? false,
+            'token_type' => $tokenType,
         ]);
     }
 }

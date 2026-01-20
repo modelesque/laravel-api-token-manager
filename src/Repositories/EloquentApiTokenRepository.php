@@ -25,6 +25,8 @@ class EloquentApiTokenRepository implements ApiTokenRepositoryInterface
     public function saveToken(string $provider, string $account, string $grantType, array $payload): ApiToken
     {
         $payload['provider'] = $provider;
+        $payload['account'] = $account;
+        $payload['grant_type'] = $grantType;
 
         return $this->model::query()->updateOrCreate(
             [
