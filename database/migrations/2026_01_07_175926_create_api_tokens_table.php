@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('provider')->index();
             $table->string('account')->default('public'); // public or private
-            $table->string('grant_type')->nullable(); // pkce, cc, etc
+            $table->string('grant_type')->nullable(); // 'authorization_code', 'client_credentials', etc.
             $table->string('token_type')->default('bearer'); // bearer, api-key, etc
             $table->text('token');
             $table->text('refresh_token')->nullable();

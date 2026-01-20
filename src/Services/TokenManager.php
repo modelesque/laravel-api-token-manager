@@ -46,15 +46,8 @@ class TokenManager
         Config::getProvider($configKey);
 
         // no saved token, so get a new one
-        /** @var OAuth2TokenProviderInterface $provider */
-        $provider = match ($grantType) {
-            ApiTokenGrantType::AUTHORIZATION_CODE->value => new AuthCodeTokenProvider($configKey, $account),
-            ApiTokenGrantType::CLIENT_CREDENTIALS->value => new ClientCredentialsTokenProvider($configKey,$account),
-            default => throw new RuntimeException("Unsupported token grant type: $grantType"),
-        };
-
+        $provider = $this->makeProvider($configKey, $account, $grantType);
         $payload = $provider->requestToken($savedToken);
-        $payload['grant_type'] = $grantType;
 
         // save the returned token to the db
         $saved = $this->repository->saveToken(
@@ -65,5 +58,23 @@ class TokenManager
         );
 
         return $saved->token;
+    }
+
+    /**
+     * Return a new TokenProvider object with methods to handle new tokens.
+     *
+     * @param string $configKey
+     * @param string $account
+     * @param string $grantType
+     * @return OAuth2TokenProviderInterface
+     * @throws InvalidConfigException
+     */
+    public function makeProvider(string $configKey, string $account, string $grantType): OAuth2TokenProviderInterface
+    {
+        return match ($grantType) {
+            ApiTokenGrantType::AUTHORIZATION_CODE->value => new AuthCodeTokenProvider($configKey, $account),
+            ApiTokenGrantType::CLIENT_CREDENTIALS->value => new ClientCredentialsTokenProvider($configKey,$account),
+            default => throw new RuntimeException("Unsupported token grant type: $grantType"),
+        };
     }
 }
