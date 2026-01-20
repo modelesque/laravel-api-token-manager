@@ -144,12 +144,13 @@ class AuthCodeTokenProvider extends BaseTokenProvider implements OAuth2TokenProv
         );
 
         return array_filter([
-            'token_type' => $tokenType,
-            'token' => $token,
+            'expires_at' => $expiresAt ?: false,
+            'grant_type' => ApiTokenGrantType::AUTHORIZATION_CODE->value,
+            'meta' => $response,
             'refresh_token' => $refreshToken,
             'scope' => $scope,
-            'expires_at' => $expiresAt ?: false,
-            'meta' => $response,
+            'token' => $token,
+            'token_type' => $tokenType,
         ]);
     }
 
