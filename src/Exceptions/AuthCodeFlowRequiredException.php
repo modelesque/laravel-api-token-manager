@@ -8,7 +8,7 @@ use JetBrains\PhpStorm\Pure;
 class AuthCodeFlowRequiredException extends Exception
 {
     #[Pure]
-    public function __construct($message = 'PKCE authorization is required.')
+    public function __construct($message = 'The "Authorization Code Flow" is required.')
     {
         parent::__construct($message);
     }

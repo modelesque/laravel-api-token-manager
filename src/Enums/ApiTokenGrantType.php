@@ -12,8 +12,8 @@ enum ApiTokenGrantType: string
     public function label(): string
     {
         return match ($this) {
-            self::AUTHORIZATION_CODE => 'PKCE Authorization Code Flow',
-            self::REFRESH_TOKEN => 'PKCE Refresh Token',
+            self::AUTHORIZATION_CODE => 'Authorization Code Flow',
+            self::REFRESH_TOKEN => 'Refresh Token',
             self::CLIENT_CREDENTIALS => 'Client Credentials',
         };
     }
