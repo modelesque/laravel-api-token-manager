@@ -154,7 +154,7 @@ class AuthCodeTokenProvider extends BaseTokenProvider implements OAuth2TokenProv
         ]);
     }
 
-    /** @return string The code verifier for the PKCE process */
+    /** @return string The code verifier for the PKCE "Auth Code Flow" process */
     public function getCodeVerifier(): string
     {
         if ($this->codeVerifier) {
@@ -178,7 +178,7 @@ class AuthCodeTokenProvider extends BaseTokenProvider implements OAuth2TokenProv
         return $this->codeVerifier;
     }
 
-    /** @param string|mixed $codeVerifier Store the code verifier for reuse during the PKCE process */
+    /** @param string|mixed $codeVerifier Store the code verifier for reuse during the PKCE "Auth Code Flow" process */
     public function setCodeVerifier(mixed $codeVerifier): void
     {
         if (is_string($codeVerifier)) {
@@ -186,7 +186,7 @@ class AuthCodeTokenProvider extends BaseTokenProvider implements OAuth2TokenProv
         }
     }
 
-    /** @return string The code challenge for the PKCE process */
+    /** @return string The code challenge for the PKCE "Auth Code Flow" process */
     public function getCodeChallenge(string $codeVerifier): string
     {
         $challengeBytes = hash("sha256", $codeVerifier, true);
@@ -246,7 +246,7 @@ class AuthCodeTokenProvider extends BaseTokenProvider implements OAuth2TokenProv
             'scope' => is_array($scope) ? implode(' ', $scope) : false,
             'state' => $state,
 
-            // needed for PKCE
+            // needed for PKCE "Auth Code Flow" process
             'code_challenge_method' => $this->usesPkce ? 'S256' : false,
             'code_challenge' => $this->usesPkce
                 ? $this->getCodeChallenge($this->getCodeVerifier())
@@ -336,7 +336,7 @@ class AuthCodeTokenProvider extends BaseTokenProvider implements OAuth2TokenProv
             }
 
             $error = sprintf(
-                "Error getting auth code from %s during PKCE process: %s",
+                "Error getting code from %s after \"Auth Code Flow\": %s",
                 $this->name(),
                 $error
             );

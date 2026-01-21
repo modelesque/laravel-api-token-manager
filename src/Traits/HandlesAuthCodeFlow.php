@@ -15,7 +15,7 @@ trait HandlesAuthCodeFlow
     protected AuthCodeTokenProvider|AuthCodeFlowInterface|null $provider = null;
 
     /**
-     * Get the PKCE token provider to handle Authorization Code Flow process.
+     * Get the token provider to handle Authorization Code Flow process.
      *
      * @param int $retryAttempts
      * @param int $retrySleepMs
