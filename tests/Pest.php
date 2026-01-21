@@ -1,10 +1,10 @@
 <?php
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modelesque\ApiTokenManager\Tests\TestCase;
 
-uses(TestCase::class)->in(__DIR__);
+uses(TestCase::class, RefreshDatabase::class)->in('Feature');
+uses(TestCase::class)->in('Unit');
 
-afterEach(function () {
-    // Ensure Mockery expectations are verified and resources freed
-    Mockery::close();
-});
+// clean up Mockery after each test
+afterEach(fn() => Mockery::close());
