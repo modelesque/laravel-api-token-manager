@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection StaticClosureCanBeUsedInspection */
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Config;
@@ -7,17 +7,22 @@ use Modelesque\ApiTokenManager\Contracts\OAuth2TokenProviderInterface;
 use Modelesque\ApiTokenManager\Enums\ApiAccount;
 use Modelesque\ApiTokenManager\Enums\ApiTokenGrantType;
 use Modelesque\ApiTokenManager\Models\ApiToken;
+use Modelesque\ApiTokenManager\Services\Providers\AuthCodeTokenProvider;
 use Modelesque\ApiTokenManager\Services\Providers\ClientCredentialsTokenProvider;
 use Modelesque\ApiTokenManager\Services\TokenManager;
 
+$grantTypes = [
+    ApiTokenGrantType::CLIENT_CREDENTIALS->label() => ApiTokenGrantType::CLIENT_CREDENTIALS->value,
+    ApiTokenGrantType::AUTHORIZATION_CODE->label() => ApiTokenGrantType::AUTHORIZATION_CODE->value,
+];
+
 /**
- * Test the scenario where a saved token already exists in the db.
+ * Test the positive scenario where a saved token already exists in the db.
  * @see TokenManager::getToken()
  */
-it('returns a saved, valid token', function () {
+test('TokenManager::getToken() returns a saved, valid token', function (string $grantType) {
     $configKey = 'test';
     $account = ApiAccount::PUBLIC->value;
-    $grantType = ApiTokenGrantType::CLIENT_CREDENTIALS->value;
     $tokenValue = 'saved_token';
 
     // create a fake ApiTokenRepository that finds a saved token in the db
@@ -40,17 +45,17 @@ it('returns a saved, valid token', function () {
     $tokenManager = new TokenManager($repo);
     $result = $tokenManager->getToken($configKey, $account, $grantType);
     expect($result)->toBe($tokenValue);
-});
+
+})->with($grantTypes);
 
 
 /**
- * Test the scenario where a new token must be requested because one doesn't exist in the db.
+ * Test the positive scenario where a new token must be requested because one doesn't exist in the db.
  * @see TokenManager::getToken()
  */
-it("requests a new 'client_credentials' token and saves it in the database", function() {
+test("TokenManager::getToken() requests a new token from the provider and saves it in the database", function(string $grantType) {
     $configKey = 'test';
     $account = ApiAccount::PUBLIC->value;
-    $grantType = ApiTokenGrantType::CLIENT_CREDENTIALS->value;
     $tokenValue = 'new_token';
 
     // pretend an API config exists
@@ -70,7 +75,11 @@ it("requests a new 'client_credentials' token and saves it in the database", fun
         'provider' => $configKey,
         'token' => $tokenValue,
     ];
-    $mockProvider = Mockery::mock(ClientCredentialsTokenProvider::class);
+    $mockProvider = match($grantType) {
+        ApiTokenGrantType::CLIENT_CREDENTIALS->value => Mockery::mock(ClientCredentialsTokenProvider::class),
+        ApiTokenGrantType::AUTHORIZATION_CODE->value => Mockery::mock(AuthCodeTokenProvider::class),
+        default => throw new RuntimeException('Invalid grant type provided.'),
+    };
     $mockProvider->shouldReceive('requestToken')
         ->once()
         ->with(null)
@@ -86,7 +95,8 @@ it("requests a new 'client_credentials' token and saves it in the database", fun
             Mockery::on(static fn($payload) =>
                 is_array($payload) &&
                 $payload['token'] === $providerPayload['token'] &&
-                $payload['grant_type'] === $grantType)
+                $payload['grant_type'] === $grantType
+            )
         )
         ->andReturn(ApiToken::make([
             'provider' => $configKey,
@@ -113,4 +123,73 @@ it("requests a new 'client_credentials' token and saves it in the database", fun
     // now run the unit test with everything in place
     $token = $manager->getToken($configKey, $account, $grantType);
     expect($token)->toBe($tokenValue);
-});
+})->with($grantTypes);
+
+
+/**
+ * Test the negative scenario where a token provider returns an invalid payload.
+ * @see TokenManager::getToken()
+ */
+test("TokenManager::getToken() requests a new token but the provider returns invalid data.", function(string $grantType) {
+    $configKey = 'test';
+    $account = ApiAccount::PUBLIC->value;
+
+    // pretend an API config exists
+    Config::set("apis.providers.$configKey", []);
+
+    // create a fake ApiTokenRepository that searches for a token in the db and returns null
+    $repo = Mockery::mock(ApiTokenRepositoryInterface::class);
+    $repo->shouldReceive('getSavedToken')
+        ->once()
+        ->with($configKey, $account, $grantType)
+        ->andReturnNull();
+
+    // get the provider and pretend it returns a false value from requesting a new token
+    // from the API
+    $providerPayload = ['no_token' => 'no_value'];
+    $mockProvider = match($grantType) {
+        ApiTokenGrantType::CLIENT_CREDENTIALS->value => Mockery::mock(ClientCredentialsTokenProvider::class),
+        ApiTokenGrantType::AUTHORIZATION_CODE->value => Mockery::mock(AuthCodeTokenProvider::class),
+        default => throw new RuntimeException('Invalid grant type provided.'),
+    };
+    $mockProvider->shouldReceive('requestToken')
+        ->once()
+        ->with(null)
+        ->andReturn($providerPayload);
+
+
+    // save the fake, invalid payload-token-data from the API to the db
+    $repo->shouldReceive('saveToken')
+        ->once()
+        ->with(
+            $configKey,
+            $account,
+            $grantType,
+            Mockery::on(static fn($payload) =>
+                is_array($payload) &&
+                isset($payload['no_token'])
+            )
+        )
+        ->andThrow(new RuntimeException('DB save failed: invalid payload'));
+
+
+    // create a fake TokenManager to override makeProvider() and return the mock provider
+    // created above.
+    $manager = new class($repo, $mockProvider) extends TokenManager {
+        private OAuth2TokenProviderInterface $testProvider;
+        public function __construct($repo, $testProvider)
+        {
+            parent::__construct($repo); $this->testProvider = $testProvider;
+        }
+        public function makeProvider(string $configKey, string $account, string $grantType): OAuth2TokenProviderInterface
+        {
+            return $this->testProvider;
+        }
+    };
+
+    // now run the unit test with everything in place, expecting it to fail
+    $this->expectException(RuntimeException::class);
+    $this->expectExceptionMessage('DB save failed: invalid payload');
+    $manager->getToken($configKey, $account, $grantType);
+
+})->with($grantTypes);
