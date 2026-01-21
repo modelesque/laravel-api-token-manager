@@ -124,3 +124,72 @@ test("TokenManager::getToken() requests a new token from the provider and saves 
     $token = $manager->getToken($configKey, $account, $grantType);
     expect($token)->toBe($tokenValue);
 })->with($grantTypes);
+
+
+/**
+ * Test the negative scenario where a token provider returns an invalid payload.
+ * @see TokenManager::getToken()
+ */
+test("TokenManager::getToken() requests a new token but the provider returns invalid data.", function(string $grantType) {
+    $configKey = 'test';
+    $account = ApiAccount::PUBLIC->value;
+
+    // pretend an API config exists
+    Config::set("apis.providers.$configKey", []);
+
+    // create a fake ApiTokenRepository that searches for a token in the db and returns null
+    $repo = Mockery::mock(ApiTokenRepositoryInterface::class);
+    $repo->shouldReceive('getSavedToken')
+        ->once()
+        ->with($configKey, $account, $grantType)
+        ->andReturnNull();
+
+    // get the provider and pretend it returns a false value from requesting a new token
+    // from the API
+    $providerPayload = ['no_token' => 'no_value'];
+    $mockProvider = match($grantType) {
+        ApiTokenGrantType::CLIENT_CREDENTIALS->value => Mockery::mock(ClientCredentialsTokenProvider::class),
+        ApiTokenGrantType::AUTHORIZATION_CODE->value => Mockery::mock(AuthCodeTokenProvider::class),
+        default => throw new RuntimeException('Invalid grant type provided.'),
+    };
+    $mockProvider->shouldReceive('requestToken')
+        ->once()
+        ->with(null)
+        ->andReturn($providerPayload);
+
+
+    // save the fake, invalid payload-token-data from the API to the db
+    $repo->shouldReceive('saveToken')
+        ->once()
+        ->with(
+            $configKey,
+            $account,
+            $grantType,
+            Mockery::on(static fn($payload) =>
+                is_array($payload) &&
+                isset($payload['no_token'])
+            )
+        )
+        ->andThrow(new RuntimeException('DB save failed: invalid payload'));
+
+
+    // create a fake TokenManager to override makeProvider() and return the mock provider
+    // created above.
+    $manager = new class($repo, $mockProvider) extends TokenManager {
+        private OAuth2TokenProviderInterface $testProvider;
+        public function __construct($repo, $testProvider)
+        {
+            parent::__construct($repo); $this->testProvider = $testProvider;
+        }
+        public function makeProvider(string $configKey, string $account, string $grantType): OAuth2TokenProviderInterface
+        {
+            return $this->testProvider;
+        }
+    };
+
+    // now run the unit test with everything in place, expecting it to fail
+    $this->expectException(RuntimeException::class);
+    $this->expectExceptionMessage('DB save failed: invalid payload');
+    $manager->getToken($configKey, $account, $grantType);
+
+})->with($grantTypes);
